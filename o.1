@@ -1,6 +1,6 @@
 .\"             -*-Nroff-*-
 .\"
-.TH "o" 1 "8 Apr 2021" "o" "User Commands"
+.TH "o" 1 "17 Jun 2024" "o" "User Commands"
 .SH NAME
 o \- an editor
 .SH SYNOPSIS
@@ -15,11 +15,32 @@ Edit an existing file or create a new one.
 The line number can be prefixed with \fB+\fP, or be a suffix of the filename if prefixed with \fB:\fP.
 .sp
 .TP
-.B \-v or\-\-version
-displays the current version number
+.B \-c FILENAME or \-\-copy FILENAME
+Copy the given file into the clipboard.
+.TP
+.B \-f or \-\-force
+Ignore file locks when opening files.
+.TP
+.B \-l or \-\-last-command
+Output the last used build/format/export command.
+.TP
+.B \-m FILENAME or \-\-monitor FILENAME
+Monitor the given file for changes, and open it as read-ony.
+.TP
+.B \-n or \-\-no-cache
+Avoid writing the location history, search history, game highscore and last build/format/export command to the cache directory.
+.TP
+.B \-p FILENAME or \-\-paste FILENAME
+Paste the contents of the clipboard into the given file. Combine with \-f to overwrite the file.
+.TP
+.B \-r or \-\-clear-locks
+Clear all file locks.
+.TP
+.B \-v or \-\-version
+Display the current version.
 .TP
 .B \-h or \-\-help
-displays brief usage information
+Display brief usage information.
 .PP
 .SH KEYBINDINGS
 .sp
@@ -33,6 +54,7 @@ displays brief usage information
   Format the current file with \fBgoimport\fP or \fBclang-format\fP, depending on the file extension.
   Zig, V, Rust (\fBrustfmt\fP), Haskell (\fBbrittany\fP) and Python (\fBautopep8\fP) are also supported.
   If in git mode, cycle the git interactive rebase keyword on the current line.
+  If in Markdown mode, format the table under the cursor.
 .sp
 .B ctrl-a
   Go to start of the text, then the start of the line and then the previous line.
@@ -40,29 +62,34 @@ displays brief usage information
 .B ctrl-e
   Go to end of the line and then the next line.
 .sp
-.B ctrl-p
-  Scroll up 10 lines or go to the previous match if a search is active.
 .sp
 .B ctrl-n
   Scroll down 10 lines or go to the next match if a search is active.
+  Insert a new column when in the Markdown table editor.
+.B ctrl-p
+  Scroll up 10 lines or go to the previous match if a search is active.
+  Remove an empty column when in the Markdown table editor.
 .sp
 .B ctrl-k
   Delete all characters to the end of the line. Delete the line if it is empty.
 .sp
 .B ctrl-g
-  Toggle a status line at the bottom for displaying: filename, line, column, unicode number and word count.
+  Toggle a status line at the bottom for displaying: filename, line, column, unicode number, word count, indentation type and editor mode.
+  Can also jump to definition (experimental feature).
 .sp
 .B ctrl-d
   Delete a single character.
 .sp
 .B ctrl-o
-  Open the command menu, which is a list of actions that can be performed. The first item is always "Save and quit", for ease of use.
-  If editing a PKGBUILD file, there will be a menu option for updating the pkgver + source fields, that is mainly based on guessing.
+  Open the command menu, which is a list of actions that can be performed.
+  If editing a PKGBUILD file and guessica is installed, there will be a menu option for updating the pkgver + source fields.
+  If pandoc is installed, a menu option for rendering to PDF may appear.
 .sp
 .B ctrl-t
-  Render the current document to a PDF file.
-  When editing a C++ header file, switch to the corresponding implementation if the file search is quick enough,
-  and the other way around.
+  For C and C++: switch between the corresponding header and implementation.
+  For Agda, insert a symbol.
+  For Markdown, if the cursor is on a table, launch the Markdown table editor.
+  For the rest, record and play back keypresses. Press escape to clear the current macro.
 .sp
 .B ctrl-c
   Press twice to copy the current block of text (until a blank line or the end of the file).
@@ -70,17 +97,19 @@ displays brief usage information
   Also closes the portal.
 .sp
 .B ctrl-v
-  Press twice to paste the copied text, untrimmed.
   Press once to paste only the first line of the copied text, trimmed.
+  Press twice to paste the all copied text, untrimmed.
 .sp
 .B ctrl-x
-  Press twice to cut the current block of text (until a blank line or the end of the file).
   Press once to only cut the current line (or delete the line, if empty).
+  Press twice to cut the current block of text (until a blank line or the end of the file).
   Also closes the portal.
 .sp
 .B ctrl-b
+  Jump back after jumping to a definition with `ctrl-g`.
   Bookmark the current line. Press again to remove the bookmark.
   If a bookmark is set, and not on the bookmarked line, jump to the bookmark.
+  Toggle the breakpoint if the editor is in debug mode.
 .sp
 .B ctrl-j
   Join lines.
@@ -89,25 +118,47 @@ displays brief usage information
   Undo (\fBctrl-z\P is also possible, but may background the application).
 .sp
 .B ctrl-l
-  Jump to a specific line number. Press return to jump to the top.
+  Jump to a specific line number or percentage. Press return to jump to the top. Press return again to jump to the bottom.
+  Press one of the highlighted on-screen letters to jump to that location.
 .sp
 .B ctrl-f
   Search for a string from the current location. The search wraps around and is case sensitive.
+  There is also support for text replacement, after typing in the search term:
+  To replace all, press tab instead of return, enter a replace term and then press tab.
+  To replace once, press tab instead of return, enter a replace term and then press return.
+  Search for just \fBf\P to find the previous function signature.
 .sp
 .B esc
   Redraw the screen and clear the last search.
 .sp
 .B ctrl-space
-  Build Go programs with `go build`.
+  Build Go programs with `go`.
   Build C++ programs with `cxx`.
-  Export Markdown to PDF using `pandoc`.
+  Build Rust programs with `cargo` or `rustc`.
+  Build Zig programs with `zig`.
+  Build Haskell programs with `ghc`.
+  Check Python programs with `python -m py_compile`.
+  Build Crystal programs with `crystal`.
+  Build Kotlin programs with `kotlinc`,
+    or `kotlinc-native` if available.
+  Build Java programs with `javac` and `jar`.
+  Build Scala programs with `scalac`.
+  Build Lua programs with `luac`.
+  Build Object Pascal programs with `fpc`.
+  Build Nim programs with `nim`.
+  Build Odin programs with `odin`.
+  Build V programs with `v`.
+  Build C# programs with `csc -nollogo -unsafe`.
+  Build D programs with `gdc`.
+  Build Standard ML programs with `mlton`.
+  Build OCaml programs with `ocamlopt`.
   Export scdoc files to man using `scdoc`.
   Export asciidoctor files to man using `asciidoctor`.
-  Build Zig programs with `zig build`.
-  Build V programs with `v`.
-  Build Rust programs with `cargo build` or `rustc`.
-  Build Haskell programs with `ghc -dynamic`.
   Build Arch Linux packages with `makepkg`.
+  Build Agda programs with `agda`.
+  Double press to render Markdown to HTML.
+.sp
+  The last used external command by `o` can be found in `~/.cache/o/last_command.sh`.
 .sp
 .B ctrl-~
   Jump to a matching parenthesis, curly bracket or square bracket.
@@ -116,6 +167,12 @@ displays brief usage information
 .sp
 .B ctrl-\\\\
   Toggle single-line comments for a block of code.
+.sp
+.B ctrl-_
+  If the cursor is on a parenthesis, jump to the matching parenthesis.
+  If not, insert a symbol by typing in a 2-letter digraph.
+  The digraphs are the same as for ViM.
+  For a full overview, see: https://raw.githubusercontent.com/xyproto/digraph/main/digraphs.txt
 .sp
 .B ctrl-r
   Open or close a portal. Text can be pasted from the portal into another file with `ctrl-v`.
@@ -127,10 +184,13 @@ The \fBNO_COLOR\fP environment variable can be set to 1 to disable all colors.
 .sp
 If \fBXTERM_VERSION\fP is set (usually automatically by xterm), the "light" color scheme will be used.
 .sp
+.SH "MAN PAGER"
+O can be used for viewing man pages by setting MANPAGER to "o" with ie. \fBexport MANPAGER=o\fP.
 .SH "WHY"
 .sp
 I wanted to write a simple editor that only used VT100 terminal codes.
 .SH "SEE ALSO"
+.BR e3 (1)
 .BR nano (1)
 .BR micro (1)
 .SH KNOWN BUGS
@@ -146,7 +206,7 @@ Middle-click pasting (instead of pasting with \fBctrl-v\fP) may have issues with
 .sp
 The smart indentation is not always smart.
 .SH VERSION
-2.36.0
+2.65.12
 .SH AUTHOR
 .B o
 was written by Alexander F. Rødseth <xyproto@archlinux.org>

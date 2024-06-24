@@ -1,32 +1,57 @@
-![o](img/o128x128.png)
+![Orbiton Logo](img/icon_128x128.png)
 
-![Build](https://github.com/xyproto/o/workflows/Build/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/xyproto/o)](https://goreportcard.com/report/github.com/xyproto/o) [![License](https://img.shields.io/badge/license-BSD-green.svg?style=flat)](https://raw.githubusercontent.com/xyproto/o/main/LICENSE)
+![Build](https://github.com/xyproto/orbiton/workflows/Build/badge.svg) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fxyproto%2Forbiton.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fxyproto%2Forbiton?ref=badge_shield) [![Go Report Card](https://goreportcard.com/badge/github.com/xyproto/orbiton/v2)](https://goreportcard.com/report/github.com/xyproto/orbiton/v2) [![License](https://img.shields.io/badge/license-BSD-green.svg?style=flat)](https://raw.githubusercontent.com/xyproto/orbiton/main/LICENSE)
 
-`o` is a text editor limited to the VT100 standard.
+Orbiton is a text editor and a simple IDE with the following goals in mind:
+
+* **Speed and responsiveness**
+* **Minimal annoyance** (within the limits of `VT100`)
+* **Support for rapid edit-format-compile cycles**
 
 It might be a good fit for:
 
-* Editing git commit messages (using `EDITOR=o git commit`).
+* Writing git commit messages (using `EDITOR=o git commit`).
 * Editing `README.md` and `TODO.md` files.
-* Write Markdown files and then export to PDF.
-* Learning "up and coming" programming languages, like Zig or Rust.
+* Writing Markdown and then exporting to HTML or PDF.
+* Learning programming languages, like Rust or Zig.
 * Editing files deep within larger Go or C++ projects.
 * Solving Advent of Code tasks.
-* Writing and maintaining to-do lists and project documentation in Markdown.
+* Being placed on a live image for a Linux or BSD distro, since it supports VT100, is small and self-contained, has a built-in log, man page and image viewer, has an optional nano/pico mode, can be used as `EDITOR=o visudo` and has built-in support for editing and formatting `/etc/fstab` files.
+* Writing any number of words in a distraction-free fullscreen environment. (Press `ctrl-g` to see the word count in the status bar).
 
-For a more feature complete editor that is also written in Go, check out [micro](https://github.com/zyedidia/micro).
+## Screenshots
+
+Screenshot of the VTE GUI application (that can be found in the `gtk3` directory), running the `o` editor:
+
+![screenshot](img/screenshot2021sept.png)
+
+Stepping through the assembly instructions of a Rust program by entering debug mode with the `ctrl-o` menu and then stepping with `ctrl-n`:
+
+![debug rust](img/2022-05-11_debug_rust.png)
+
+Editing a C source file in `og` using the "synthwave" theme:
+
+![synthwave theme](img/2022-10-08_synthwave_theme.png)
 
 ## Packaging status
 
-[![Packaging status](https://repology.org/badge/vertical-allrepos/o-editor.svg)](https://repology.org/project/o-editor/versions) [![Packaging status](https://repology.org/badge/vertical-allrepos/o.svg)](https://repology.org/project/o/versions)
+| **orbiton**                                                                                                                    |
+|--------------------------------------------------------------------------------------------------------------------------------|
+| [![Packaging status](https://repology.org/badge/vertical-allrepos/orbiton.svg)](https://repology.org/project/orbiton/versions) |
 
 ## Quick start
 
-You can install `o` with Go 1.10 or later:
+With Go 1.21, the development version of `o` can be installed like this:
 
-    go get -u github.com/xyproto/o
+    go install github.com/xyproto/orbiton/v2@latest && mv -i ~/go/bin/orbiton ~/go/bin/o
 
-## Setting `o` as the default editor for `git`
+Adjust the `mv` flags and the `~/go/bin` path as needed. Perhaps `go install` will have an `-o` flag in the future.
+
+Alternatively, download and install a [release version](https://github.com/xyproto/orbiton/releases). For example, for Raspberry Pi 2, 3 or 4 running Linux:
+
+    curl -sL 'https://github.com/xyproto/orbiton/releases/download/v2.65.12/orbiton-2.65.12-linux_armv7_static.tar.xz' | tar JxC /tmp && sudo install -Dm755 /tmp/orbiton-2.65.12-linux_armv7_static/o /usr/bin/o && sudo install -Dm644 /tmp/orbiton-2.65.12-linux_armv7_static/o.1.gz /usr/share/man/man1/o.1.gz
+
+## Setting `o` as the default editor executable for `git`
 
 To set:
 
@@ -36,131 +61,203 @@ To unset:
 
     git config --global --unset core.editor
 
+## Viewing man pages
+
+By setting the `MANPAGER` environment variable, it's possible to use `o` for viewing man pages:
+
+    export MANPAGER=o
+
+An alternative to viewing man pages in `o` is to use `less`:
+
+    export MANPAGER='less -s -M +Gg'
+
+## Setting up `o` on OpenSUSE
+
+Install `o` manually, until an OpenSUSE package exists:
+
+    git clone https://github.com/xyproto/orbiton
+    cd orbiton
+    make && sudo make install
+
+The following is not strictly needed, but it sets everything up to make full use of `o`:
+
+Add this to `~/.alias`:
+
+    alias o=/usr/bin/o
+
+Add this to `~/.profile`:
+
+    export MANPAGER=/usr/bin/o
+    export EDITOR=/usr/bin/o
+
+Log out and in again to activate the changes.
+
 ## Unique features
 
 These features are unique to `o`, as far as I am aware:
 
+* If the loaded file is read-only, all text will be red by default.
 * Smart cursor movement, trying to maintain the X position when moving up and down, across short and long lines.
 * Press `ctrl-v` once to paste one line, press `ctrl-v` again to paste the rest.
-* Press `ctrl-c` once to copy one line, press `ctrl-c` again to copy the rest (until a blank line).
+* Press `ctrl-c` once to copy one line, press `ctrl-c` again to copy a block of lines (until a blank line).
 * Open or close a portal with `ctrl-r`. When a portal is open, copy lines across files (or within the same file) with `ctrl-v`.
 * Build code with `ctrl-space` and format code with `ctrl-w`, for a wide range of programming languages.
-* Press `ctrl-w` to toggle the checkmark in `- [ ] TODO item` boxes in Markdown.
-* Cycle git rebase keywords with `ctrl-r`, when in an interactive git rebase session.
-* Jump to a line with `ctrl-l`. Either enter a number to jump to a line or just press `return` to jump to the top. Press `ctrl-l` and `return` again to jump to the bottom.
-* All text will be red if the loaded file is read-only.
+* Cycle git rebase keywords with `ctrl-w` or `ctrl-r`, when an interactive git rebase session is in progress.
+* Jump to a line with `ctrl-l`. Either enter a number to jump to a line or just press `return` (or `t`) to jump to the top. Press `ctrl-l` and `return` again (or `b`) to jump to the bottom. Press `c` to jump to the center.
+* When jumping to a specific line in a file with `ctrl-l`, jumping to a percentage (like `50%`) or a fraction (like `0.5` or `.5`) is also possible.
 * If tab completion in the terminal went wrong and you are trying to open a `main.` file that does not exist, but `main.cpp` and `main.o` does exists, then `main.cpp` will be opened.
+* Search by pressing `ctrl-f`, entering text and pressing `return`. Replace by pressing `tab` instead of `return`, then enter the replacement text and press `return`. Searching for unicode runes on the form `u+0000` is also supported.
+* Type `iferr` on a single line in a Go or Odin program and press `return` to insert a suitable `if err != nil { return ... }` block, based on [koron/iferr](https://github.com/koron/iferr).
+* Use the built-in Markdown table editor by pressing `ctrl-t` when the cursor is on a table. This works best for tables that are not too wide.
+* Format Markdown tables by moving the cursor to a table and pressing `ctrl-w`.
+* Correct mistakes as lines are typed in, but only if the OpenAI API key is set, and if the "fix as you type" feature is enabled from the `ctrl-o` menu.
+* For C-like languages, missing parentheses are added to statements like `if`, `for` and `while` when return is pressed.
 
 ## Other features and limitations
 
-* Loads up instantly.
-* Configuration-free, for better and for worse.
-* Can render text to PDF.
-* Compile `"Hello, World"` in many popular programming languages simply by pressing `ctrl-space`.
-* `ctrl-t` can jump between a C++ header and source file.
-* Provides syntax highlighting for Go, C++, Markdown, Bash and several other languages. There is generic syntax highlighting.
 * The syntax highlighting is instant.
+* Opens files quickly.
+* Can compile `"Hello, World"` in many popular programming languages simply by pressing `ctrl-space`.
+* Create, build and run a simple program in C, by running `o main.c`, pressing `ctrl-w` and then a double `ctrl-space`.
+* Configuration-free, for better and for worse.
+* Can preview `.png`, `.jpg`, `.jpeg`, `.gif`, `.ico`, `.bmp` or `.webp` images directly in the terminal (using a scaled down version and up to 16 colors).
+* The `-p` flag followed by a filename can be used for just pasting the clipboard to a new file, instead of editing a file.
+* `ctrl-t` can jump between a C++ header and source file, when editing C++ code.
+* `ctrl-t` shows the Markdown table editor, when editing Markdown and the cursor is on a Markdown table.
+* Can only edit one file at the time, by design.
+* Provides syntax highlighting for Go, Rust, C++, Markdown, Bash and several other languages. There is generic syntax highlighting built-in.
 * Will jump to the last visited line when opening a recent file.
 * Is provided as a single self-contained executable.
-* Tested with `alacritty`, `st`, `urxvt`, `konsole` and `xfce4-terminal`.
-* Tested on Arch Linux, Debian and FreeBSD.
-* Loads faster than both `vim` and `emacs`.
-* Never asks before saving or quitting. Be careful!
+* Loads faster than both `vim` and `emacs`, for small files.
+* Can render text to PDF either by itself or by using `pandoc`.
+* Tested with `alacritty`, `konsole`, `st`, `urxvt`, `xfce4-terminal`, `xterm` and `zutty`.
+* Tested on Arch Linux, Debian, OpenSUSE, macOS, FreeBSD and OpenBSD.
+* Never asks before saving or quitting. Be careful.
 * The [`NO_COLOR`](https://no-color.org) environment variable can be set to disable all colors.
 * Rainbow parentheses makes lines with many parentheses easier to read.
-* Limited to the VT100 standard, so hotkeys like `ctrl-a` and `ctrl-e` must be used instead of `Home` and `End`.
+* Limited to VT100, so hotkeys like `ctrl-a` and `ctrl-e` must be used instead of `Home` and `End`. And for browsing up and down, `ctrl-n` and `ctrl-p` must be used. `PgUp` and `PgDn` can be used with the GUI frontend, but are not recognized by VT100.
 * Compiles with either `go` or `gccgo`.
 * Will strip trailing whitespace whenever it can.
 * Must be given a filename at start.
 * May provide smart indentation.
 * Requires that `/dev/tty` is available.
-* `xclip` (for X) or `wl-clipboard` (for Wayland) must be installed if the system clipboard should be used.
-* May take a line number as the second argument, with an optional `+` prefix.
+* `xclip` for X, `wl-clipboard` for Wayland or `pbcopy` for macOS needs to be installed to access the system clipboard.
+* May take a line number as the second argument, with an optional `+` or `:` prefix.
 * If the filename is `COMMIT_EDITMSG`, the look and feel will be adjusted for git commit messages.
 * Supports `UTF-8`, but some runes may be displayed incorrectly.
 * Only UNIX-style line endings are supported (`\n`).
 * Will convert DOS/Windows line endings (`\r\n`) to UNIX line endings (just `\n`), whenever possible.
 * Will replace non-breaking space (`0xc2 0xa0`) with a regular space (`0x20`) whenever possible.
+* Will replace annoying tilde (`0xcc 0x88`) with a regular tilde (`~`) whenever possible.
+* Will replace the greek question mark that looks like a semicolon (`0xcd 0xbe`) with a regular semicolon (`;`) whenever possible.
 * If interactive rebase is launched with `git rebase -i`, then either `ctrl-w` or `ctrl-r` will cycle the keywords for the current line (`fixup`, `drop`, `edit` etc).
-* When editing Markdown, checkboxes can be toggled with `ctrl-w`.
-* If the editor executable renamed to `red` (or have a symlink with that name), the default theme will be red/white/gray.
-* If the editor executable renamed to `light` (or have a symlink with that name), the default theme will be suitable for light backgrounds.
-* Want to quickly convert Markdown to PDF and have pandoc installed? Try `o filename.md`, press `ctrl-space` twice and quit with `ctrl-q`.
-* `o` is written mostly in `o`, with some use of NeoViM at the beginning.
+* If the editor executable is renamed to a word starting with `r` (or have a symlink with that name), the default theme will be red/black.
+* If the editor executable is renamed to a word starting with `l` (or have a symlink with that name), the default theme will be suitable for light backgrounds.
+* If the editor executable is renamed to a word starting with `s` (or have a symlink with that name), the default theme will be the "synthwave" theme.
+* Want to quickly convert Markdown to HTML? Try `o filename.md`, press `ctrl-space` twice and quit with `ctrl-q`.
+* The default syntax highlighting theme aims to be as pretty as possible with less than 16 colors, but it mainly aims for clarity. It should be easy to spot a keyword, number, string or a stray parenthesis.
+* Press `ctrl-space` or `ctrl-t` to toggle the check mark in `- [ ] TODO item` boxes in Markdown.
+* Orbiton is written mostly in Orbiton, with some use of NeoVim for the initial development.
+* Can load, edit and save gzipped text files or man pages that ends with a `.gz` extension.
+* Can organize imports, for Java and for Kotlin, when formatting code with `ctrl-w`.
+* Has a built-in spellchecker (press `ctrl-f` and then `t` to search for a typo, `ctrl-n` for next match and then `ctrl-a` to add it and `ctrl-i` to ignore it).
+* Can jump directly to a selection of highlighted letters on the screen, when `ctrl-l` has been pressed.
 
-## Known bugs
+## Known issues
 
-* In some terminal emulators, scrolling quickly up or down with the arrow keys can make the text jump around (it works fine in `alacritty`). Scroll up and down with `ctrl-n` and `ctrl-p` instead to avoid this. Press `esc` to repaint the text, if needed.
-* Some unicode runes may disrupt the text flow. This is generally not a problem for editing code and configuration files, but may be an issue when editing files that contains text in many languages.
-* For some terminal emulators, if `o` is busy performing an operation, pressing `ctrl-s` may lock the terminal. Some terminal emulators, like `konsole`, can be configured to turn off this behavior. Press `ctrl-q` to unlock the terminal again (together with the unfortunate risk of quitting `o`). You can also use the `ctrl-o` menu for saving and quitting.
-* `o` may have issues with large files (of several MB+). For normal text files or source code files, this is a non-issue.
-* Middle-click pasting (instead of pasting with `ctrl-v`) may have issues with only pasting the first character.
-* The smart indentation is not always smart.
+* Some unicode runes may disrupt the text flow! This is generally not a problem for editing code and configuration files, but is an issue when editing files that contains text in many languages, or using emojis.
+* The man page viewer can not display some special characters, such as the long dash (&mdash;), just yet.
+* Using `tmux` and resizing the terminal emulator window may trigger text rendering issues. Try pressing `esc` to redraw the text, or `ctrl-f` to search for text. Setting `TERM` correctly might help.
+* For some terminal emulators, if `o` is busy performing an operation, pressing `ctrl-s` may lock the terminal. Some terminal emulators, like `konsole`, can be configured to turn off this behavior. Press `ctrl-q` to unlock the terminal again (together with the unfortunate risk of quitting `o`). To sidestep this issue, the `ctrl-o` menu can be used instead, for saving and quitting.
+* Using `mosh` may cause text rendering issues (in both `nvim` and `o`).
+* Pressing `cmd-v`, `cmd-x` and `cmd-c` on macOS only works when using the `og` GUI/VTE frontend. For `o`, `ctrl-v`, `ctrl-x` and `ctrl-c` can be used instead.
+* The Markdown table editor does not have scrolling, so the table must fit within the current terminal emulator width and height. Resize the terminal as needed.
+* Middle-click pasting (instead of pasting with `ctrl-v`) will only paste the first character.
 
 ## Hotkeys
 
+There are pretty few hotkeys to remember:
+
 * `ctrl-s` - Save.
 * `ctrl-q` - Quit.
-* `ctrl-r` - Open or close a portal. Text can be pasted from the portal into another file with `ctrl-v`.
-             For "git interactive rebase" mode (`git rebase -i`), this will cycle the rebase keywords.
-* `ctrl-w` - Format the current file (see the table below).
+* `ctrl-r` - Open or close a portal. Text can be pasted from the portal into another (or the same) file with `ctrl-v`.
+             For "git interactive rebase" mode (`git rebase -i`), this will cycle the rebase keywords instead.
 * `ctrl-a` - Go to start of text, then start of line and then to the previous line.
-* `ctrl-e` - Go to end of line and then to the next line.
-* `ctrl-p` - Scroll up 10 lines, or go to the previous match if a search is active.
+* `ctrl-e` - Go to end of line and then to the next line
 * `ctrl-n` - Scroll down 10 lines, or go to the next match if a search is active.
+             Insert a column when in the Markdown table editor.
+* `ctrl-p` - Scroll up 10 lines, or go to the previous match if a search is active.
+             Remove an empty column when in the Markdown table editor.
 * `ctrl-k` - Delete characters to the end of the line, then delete the line.
-* `ctrl-g` - Toggle a status line at the bottom for displaying: filename, line, column, Unicode number and word count.
+* `ctrl-_` - Jump to a matching parenthesis or bracket, if the cursor is on one,
+             otherwise insert a symbol by typing in a 2-letter [digraph](https://raw.githubusercontent.com/xyproto/digraph/main/digraphs.txt).
 * `ctrl-d` - Delete a single character.
-* `ctrl-t` - Render the current document to a PDF file. For C++, toggle between header and implementation files.
-* `ctrl-o` - Open a command menu with actions that can be performed. The first menu item is always `Save and quit`.
+* `ctrl-t` - For C and C++: jump between the current header and source file. For Agda and Ivy, insert a symbol.
+             For Markdown: toggle checkboxes, or launch the table editor if the cursor is over a table.
+             For the rest: record and play back keypresses. Press `Esc` to clear the current macro.
+* `ctrl-o` - Open a command menu with actions that can be performed.
 * `ctrl-x` - Cut the current line. Press twice to cut a block of text (to the next blank line).
 * `ctrl-c` - Copy one line. Press twice to copy a block of text.
 * `ctrl-v` - Paste one trimmed line. Press twice to paste multiple untrimmed lines.
-* `ctrl-space` - Build (see table below)
+* `ctrl-space` - Build program, render to PDF or export to man page (see table below).
+                 For Markdown: toggle checkboxes, or double press to export to HTML.
 * `ctrl-j` - Join lines (or jump to the bookmark, if set).
 * `ctrl-u` - Undo (`ctrl-z` is also possible, but may background the application).
-* `ctrl-l` - Jump to a specific line number. Follows by `return` to jump to the top. If at the top, press `return` to jump to the bottom.
-* `ctrl-f` - Search for a string. The search wraps around and is case sensitive.
-* `esc` - Redraw the screen and clear the last search.
-* `ctrl-b` - Toggle a bookmark for the current line, or if set: jump to a bookmark on a different line.
+* `ctrl-l` - Jump to a specific line number or percentage. Press `return` to jump to the top. If at the top, press `return` to jump to the bottom.
+             Press one of the highlighted on-screen letters to jump to that location.
+* `ctrl-f` - Search for a string. The search wraps around and is case sensitive. Press `tab` instead of `return` to search and replace.
+* `ctrl-b` - Jump back after jumping to a definition with `ctrl-g`.
+             Toggle a bookmark for the current line, or if set: jump to a bookmark on a different line.
+* `ctrl-w` - Format the current file (see the table below), or cycle git rebase keywords. For Markdown, format the table under the cursor.
+* `ctrl-g` - Toggle the status bar.
+             Can also jump to definition, for some programming languages (experimental feature).
 * `ctrl-\` - Comment in or out a block of code.
-* `ctrl-~` - Jump to a matching parenthesis.
-
-## Updating PKGBUILD files
-
-When editing `PKGBUILD` files, it is possible to press `ctrl-o` and select `Call Guessica` to update the `pkgver=` and `source=` fields, by a combination of guesswork and online searching.
-
-[`guessica`](https://github.com/xyproto/guessica) must be installed for this feature to work.
+* `ctrl-~` - Jump to a matching parenthesis or bracket.
+* `esc` - Redraw everything and clear the last search.
 
 ## Build and format
 
-* At the press of `ctrl-space`, `o` will try to build or export the current file.
-* At the press of `ctrl-w`, `o` will try to format the current file, in an opinionated way.
+* Press `ctrl-space` to build or export the current file.
+* Press `ctrl-w` to format the current file, in an opinionated way. If the current file is empty, a "Hello, World!" template will be inserted, for some file extensions.
+* If a build or export returns an error code and the status message is not specific enough, the last called command can be run from the command line with `$(o -l)`, to get more details. `o -l` can be used to preview the command.
 
-| Programming language                            | File extensions                                           | Jump to error | Build command                                     | Format command ($filename is a temporary file)                                                                 |
-|-------------------------------------------------|-----------------------------------------------------------|---------------|---------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| Go                                              | `.go`                                                     | yes           | `go build`                                        | `goimports -w -- $filename`                                                                                    |
-| C++                                             | `.cpp`, `.cc`, `.cxx`, `.h`, `.hpp`, `.c++`, `.h++`, `.c` | yes           | `cxx`                                             | `clang-format -fallback-style=WebKit -style=file -i -- $filename`                                              |
-| Rust                                            | `.rs`                                                     | yes           | `rustc $filename`                                 | `rustfmt $filename`                                                                                            |
-| Rust, if `Cargo.toml` or `../Cargo.toml` exists | `.rs`                                                     | yes           | `cargo build`                                     | `rustfmt $filename`                                                                                            |
-| Zig                                             | `.zig`                                                    | yes           | `zig build-exe -lc $filename`                     | `zig fmt $filename`                                                                                            |
-| V                                               | `.v`                                                      | yes           | `v build`                                         | `v fmt $filename`                                                                                              |
-| Haskell                                         | `.hs`                                                     | yes           | `ghc -dynamic $filename`                          | `brittany --write-mode=inplace $filename`                                                                      |
-| Python                                          | `.py`                                                     | yes           | `python -m py_compile $filename`                  | `autopep8 -i --maxline-length 120 $filename`                                                                   |
-| Crystal                                         | `.cr`                                                     | yes           | `crystal build --no-color $filename`              | `crystal tool format $filename`                                                                                |
-| Kotlin                                          | `.kt`                                                     | yes           | `kotlinc $filename -include-runtime -d`           | `ktlint`                                                                                                       |
-| Kotlin, if `kotlinc-native` is installed        | `.kt`                                                     | yes           | `kotlinc-native -nowarn -opt -Xallocator=mimalloc -produce program -linker-option '--as-needed' $filename` | `ktlint`                                              |
-| Java                                            | `.java`                                                   | yes           | `javac` + `jar`, see details below                | `google-java-format -i $filename`                                                                              |
-| Scala                                           | `.scala`                                                  | yes           | `scalac` + `jar`, see details below               | WIP                                                                              |
-| Lua                                             | `.lua`                                                    | yes           | `luac`                                            | `lua-format -i --no-keep-simple-function-one-line --column-limit=120 --indent-width=2 --no-use-tab $filename`  |
-| Object Pascal                                   | `.pas`, `.pp`, `.lpr`                                     | yes           | `fpc`                                             | WIP                                                                                                            |
-| Nim                                             | `.nim`                                                    | WIP           | `nim c`                                           | WIP                                                                                                            |
-| Odin                                            | `.odin`                                                   | yes           | `odin build`                                      | N/A                                                                                                            |
+| Programming language                            | File extensions                                           | Jump to error | Build command                                                                                              | Format command ($filename is a temporary file)                                                                |
+|-------------------------------------------------|-----------------------------------------------------------|---------------|------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| Ada                                             | `.ada`                                                    | WIP           | WIP                                                                                                        | WIP                                                                                                           |
+| Agda                                            | `.agda`                                                   | yes           | `agda -c $filename`                                                                                        | N/A                                                                                                           |
+| ALGOL 68                                        | `.a68`                                                    | WIP           | `a68g --compile $filename`                                                                                 | WIP                                                                                                           |
+| C and C++                                       | `.cpp`, `.cc`, `.cxx`, `.h`, `.hpp`, `.c++`, `.h++`, `.c` | yes           | `cxx`                                                                                                      | `clang-format -fallback-style=WebKit -style=file -i -- $filename`                                             |
+| C#                                              | `.cs`                                                     | yes           | `csc -nologo -unsafe $filename`                                                                            | `astyle -mode=cs $filename`                                                                                   |
+| Clojure                                         | `.clj`, `.cljs`, `.clojure`                               | WIP           | `lein uberjar`                                                                                             | WIP                                                                                                           |
+| Crystal                                         | `.cr`                                                     | yes           | `crystal build --no-color $filename`                                                                       | `crystal tool format $filename`                                                                               |
+| D                                               | `.d`                                                      | yes           | `gdc`                                                                                                      | WIP                                                                                                           |
+| Dart                                            | `.dart`                                                   | yes           | `dart compile exe --verbosity error $filename`                                                             | `dart format`                                                                                                 |
+| Garnet                                          | `.gt`                                                     | WIP           | `garnetc -o $executable $filename`                                                                         | N/A                                                                                                           |
+| Go                                              | `.go`                                                     | yes           | `go build`                                                                                                 | `goimports -w -- $filename`                                                                                   |
+| Hare                                            | `.ha`                                                     | yes           | `hare build`                                                                                               | N/A                                                                                                           |
+| Haskell                                         | `.hs`                                                     | yes           | `ghc -dynamic $filename`                                                                                   | `brittany --write-mode=inplace $filename`                                                                     |
+| Ivy                                             | `.ivy`                                                    | WIP           | WIP                                                                                                        | N/A                                                                                                           |
+| Jakt                                            | `.jakt`                                                   | WIP           | WIP                                                                                                        | WIP                                                                                                           |
+| Java                                            | `.java`                                                   | yes           | `javac` + `jar`, see details below                                                                         | `google-java-format -i $filename`                                                                             |
+| JavaScript                                      | `.js`                                                     | WIP           | WIP                                                                                                        | `prettier --tab-width 4 -w $filename`                                                                         |
+| Just                                            | `.just`, `.justfile`, `justfile`                          | no            | no                                                                                                         | `just --unstable --fmt -f $filename`                                                                          |
+| Kotlin, if `kotlinc-native` is installed        | `.kt`                                                     | yes           | `kotlinc-native -nowarn -opt -Xallocator=mimalloc -produce program -linker-option '--as-needed' $filename` | `ktlint`                                                                                                      |
+| Kotlin                                          | `.kt`                                                     | yes           | `kotlinc $filename -include-runtime -d`                                                                    | `ktlint`                                                                                                      |
+| Lua                                             | `.lua`                                                    | yes           | `luac`                                                                                                     | `lua-format -i --no-keep-simple-function-one-line --column-limit=120 --indent-width=2 --no-use-tab $filename` |
+| Nim                                             | `.nim`                                                    | WIP           | `nim c`                                                                                                    | WIP                                                                                                           |
+| Object Pascal                                   | `.pas`, `.pp`, `.lpr`                                     | yes           | `fpc`                                                                                                      | WIP                                                                                                           |
+| OCaml                                           | `.ml`                                                     | WIP           | `ocamlopt -o $executable $filename`                                                                        | WIP                                                                                                           |
+| Odin                                            | `.odin`                                                   | yes           | `odin build`                                                                                               | N/A                                                                                                           |
+| Python                                          | `.py`                                                     | yes           | `python -m py_compile $filename`                                                                           | `black $filename`                                                                                             |
+| Rust, if `Cargo.toml` or `../Cargo.toml` exists | `.rs`                                                     | yes           | `cargo build`                                                                                              | `rustfmt $filename`                                                                                           |
+| Rust                                            | `.rs`                                                     | yes           | `rustc $filename`                                                                                          | `rustfmt $filename`                                                                                           |
+| Scala                                           | `.scala`                                                  | yes           | `scalac` + `jar`, see details below                                                                        | WIP                                                                                                           |
+| Standard ML                                     | `.sml`                                                    | yes           | `mlton`                                                                                                    | WIP                                                                                                           |
+| TypeScript                                      | `.ts`                                                     | WIP           | WIP                                                                                                        | WIP                                                                                                           |
+| V                                               | `.v`                                                      | yes           | `v build`                                                                                                  | `v fmt $filename`                                                                                             |
+| Zig                                             | `.zig`                                                    | yes           | `zig build-exe -lc $filename`                                                                              | `zig fmt $filename`                                                                                           |
 
-`/etc/fstab` files are also supported, and can be formatted with `ctrl-w` if [`fstabfmt`](https://github.com/xyproto/fstabfmt) is installed.
-
-| Markup language | File extensions | Jump to error | Format command ($filename is a temporary file) |
-| HTML | `.htm`, `.html` | no | `tidy -w 120 -q -i -utf8 --show-errors 0 --show-warnings no --tidy-mark no --force-output yes -ashtml -omit no -xml no -m -c` |
+`/etc/fstab`, JSON and HTML files are also supported, and can be formatted with `ctrl-w`.
 
 * `o` will try to jump to the location where the error is and otherwise display `Success`.
 * For regular text files, `ctrl-w` will word wrap the lines to a length of 99.
@@ -174,18 +271,85 @@ CXX can be downloaded here: [GitHub project page for CXX](https://github.com/xyp
 | scdoc     | `.scd`, `.scdoc` | `scdoc` (writes to `out.1`)                                       |
 | Markdown  | `.md`            | `pandoc -N --toc -V geometry:a4paper` (writes to `$filename.pdf`) |
 
-If [`guessica`](https://github.com/xyproto/guessica) is installed, `PKGBUILD` files will be updated at the press of `ctrl-w`. The `guessica` utility tries to guess the latest project version, tag and git commit hash for a `PKGBUILD` file and may or may not succeed.
+## Debug support for C and C++
 
-## Manual installation
+This is a brand new feature and needs more testing.
 
-On Linux:
+* If `gdb` is installed, it's possible to select "Debug mode" from the `ctrl-o` menu and then build and step through a program with `ctrl-space`, or set a breakpoint with `ctrl-b` and continue with `ctrl-space`.
+* Messages printed to stdout are displayed as a status message when that line is reached.
+* An indication of which line the program is at has not yet been added, and is a work in progress.
+* There are status messages indicating when the debug session is started and ended.
 
-    git clone https://github.com/xyproto/o
-    cd o
-    go build -mod=vendor
-    sudo install -Dm755 o /usr/bin/o
-    gzip o.1
-    sudo install -Dm644 o.1.gz /usr/share/man/man1/o.1.gz
+## Markdown table editor
+
+While in the Markdown table editor:
+
+* Cells can be typed into.
+* The arrow keys can be used to move around.
+* `tab` can be used to go to the next cell, or insert new cells if the last cell is reached.
+* `return` can be used to either jump to the blank cell below or to insert a new row below.
+* `backspace` can be used to delete letters, but also for deleting the current row if it is empty.
+* `ctrl-n` can be used to insert a new column to the right.
+* `ctrl-d` can be used to delete the current column (if all cells in the column are empty).
+* `esc` or `ctrl-t` can be used to close the Markdown table editor.
+* `ctrl-s` can be used to save.
+
+## Themes
+
+Themes can be selected with the `ctrl-o` menu. The theme menu also lists the theme names, which can be specified in the `O_THEME` environment variable.
+
+The `O_THEME` environment variable is an exception to the claim that `o` is configuration-free, but it is completely optional.
+
+For using ie. the Synthwave theme, the `/usr/bin/sw` symlink to `/usr/bin/o` can be used, or this can be added to `~/.profile`:
+
+    export O_THEME=synthwave
+
+## Inserting a symbol
+
+* To insert a symbol, like `æ`, just press `ctrl-_` and type in `ae`. To insert `µ`, type in `My`.
+* These are the same digraphs as ViM uses.
+* For a full overview of digraphs, see [digraphs.txt](https://raw.githubusercontent.com/xyproto/digraph/main/digraphs.txt).
+
+## Code generation
+
+* Obtain an API key from [openai.com](https://platform.openai.com/account/api-keys) and set it as the `OPENAI_API_KEY`, `OPENAI_KEY` or `CHATGPT_API_KEY` environment variable.
+* Press return after writing ie. `!write a function that adds two numbers` or `// Write a function that adds two numbers`.
+* Watch syntax highlighted code being generated beforeyour eyes. ChatGPT generates the code.
+* Press `Esc` to stop code from being generated.
+* Select `Fix as you type` from the `ctrl-o` menu to let ChatGPT try to correct every line as it is typed in. The API key must be set for the menu option to appear.
+
+## Manual installation on Linux
+
+    git clone https://github.com/xyproto/orbiton
+    cd orbiton
+    make && sudo make install
+
+And optionally:
+
+    make gui && sudo make gui-install
+
+It is also possible to install the symlinks that are suggested further down in this document.
+
+## OpenBSD installation instructions
+
+Install dependencies (use `doas` if needed):
+
+    add_pkg git gmake go vte3
+
+Build both the editor `o` and the GUI frontend `og`:
+
+    gmake CXX="clang++ -w" o og
+
+Install both executables, a man page, an icon and a desktop shortcut file (use `doas` if needed`):
+
+    PREFIX=/usr/local gmake install og-install
+
+Just building and installing `o` also works:
+
+    gmake
+    doas gmake install
+
+It is also possible to install the symlinks that are suggested further down in this document.
 
 ## Dependencies
 
@@ -220,7 +384,7 @@ Haskell
 Python
 
 * `ctrl-space` only checks the syntax, without executing. This only requires `python` to be available.
-* For formatting the code with `ctrl-w`, `autopep8` must be installed.
+* For formatting the code with `ctrl-w`, `black` must be installed.
 
 Crystal
 
@@ -242,19 +406,27 @@ Scala
 * The jar file can be executed with `java -jar main.jar`. Use `scalac -d main.jar MyFile.scala` if you want to produce a jar that can be executed with `scala main.jar`.
 * For formatting code with `ctrl-w`, `scalafmt` must be installed.
 
+D
+
+* For building code with `ctrl-space`, `gdc` must be available.
+
 JSON
 
-* The JSON formatter is built-in.
+* The JSON formatter is built-in. Note that for some files it may reorganize items in an undesirable order, so don't save the file if the result is unexpected.
 
 fstab
 
-* For formatting `fstab` files (usually `/etc/fstab`) with `ctrl-w`, [`fstabfmt`](https://github.com/xyproto/fstabfmt) must be installed.
+* Formatting `fstab` files (usually `/etc/fstab`) is a built-in feature. Just press `ctrl-w`. If you need a standalone utility, [`fstabfmt`](https://github.com/xyproto/fstabfmt) is available.
 
-## A note on Java and Scala
+JavaScript
 
-Since `kotlinc $filename -include-runtime -d` builds to a `.jar`, I though I should do the same for Java. The idea is to easily build a single or a small collection of `.java` files, where one of the file has a `main` function.
+* For formatting JavaScript code with , `prettier` must be installed.
 
-If you know an easier way to build a `.jar` file from `*.java` without using something like gradle, please let me know by submitting a pull request. This is pretty verbose...
+## Java
+
+Since `kotlinc $filename -include-runtime -d` builds to a `.jar`, I though I should do the same for Java. The idea is to easily compile a single or a small collection of `.java` files, where one of the files has a `main` function.
+
+If you know about an easier way to build a `.jar` file from `*.java`, without using something like gradle, please let me know by submitting a pull request. This is pretty verbose...
 
 ```sh
 javaFiles=$(find . -type f -name '*.java')
@@ -276,7 +448,9 @@ cd ..
 rm -rf _o_build
 ```
 
-For Scala, I'm using this code, to produce a `main.jar` file that can be run directly with `java -jar main.jar`:
+### Scala
+
+For Scala, this is the code that is used to produce a `main.jar` file that can be run directly with `java -jar main.jar`:
 
 ```sh
 #!/bin/sh
@@ -300,41 +474,75 @@ cd ..
 rm -rf _o_build
 ```
 
-If `/usr/share/scala/lib/scala-library.jar` is not found `scalac -d run_with_scala.jar` is used instead. This file can only be run with the `scala` command.
+* If `/usr/share/scala/lib/scala-library.jar` is not found `scalac -d run_with_scala.jar` is used instead.
+* If `scala-library.jar` was not found, then the resulting `jar` file will need `scala` to run.
+
+## Agda
+
+`ctrl-t` brings up a menu with a selection of special symbols.
+
+There are also these shortcuts:
+
+  * Insert `⊤` by pressing `ctrl-t` and then `t`.
+  * Insert `ℕ` by pressing `ctrl-t` and then `n`.
+
+## Updating PKGBUILD files
+
+When editing `PKGBUILD` files, it is possible to press `ctrl-o` and select `Call Guessica` to update the `pkgver=` and `source=` fields, by a combination of guesswork and online searching. This functionality depends on the [Guessica](https://github.com/xyproto/guessica) package update utility being installed, and will only work for some `PKGBUILD` files.
 
 ## List of optional runtime dependencies
 
-* `go` / `golang`
-* `goimports`
-* [`cxx`](https://github.com/xyproto/cxx)
-* `g++` / `base-devel`
-* `clang-format`
-* `rustc`
-* `rustfmt`
-* `cargo`
-* `zig`
-* `v`
-* `ghc`
-* `brittany`
-* `python`
-* `autopep8`
-* `kotlin`
-* `ktlint`
-* `javac`
-* `jar`
-* `google-java-format`
-* `pandoc`
+* `a68g` - for compiling ALGOL 68 code
+* `agda` - for compiling Agda code
+* `asciidoctor` - for writing man pages
+* `astyle` - for formatting C# code
+* `black` - for formatting Python code
+* `brittany` - for formatting Haskell code
+* `cargo` - for compiling Rust
+* `clang` - for formatting C++ code with `clang-format`
+* `clojure` - for compiling Clojure
+* `crystal` - for compiling Crystal
+* [`cxx`](https://github.com/xyproto/cxx) - for compiling C++
+* `fpc` - for compiling Object Pascal
+* `g++` - for compiling C++ code
+* `gdc` - for compiling D code
+* `ghc` - for compiling Haskell code
+* `go` - for compiling Go code
+* `go-tools` - for formatting Go code and handling imports with `goimports`
+* `google-java-format` - for formatting Java code
+* `jad` - decompile `.class` files on the fly when opening them with `o`
+* `java-environment` - for compiling Java code and creating `.jar` files with `javac` and `jar`
+* `kotlin` - for compiling Kotlin
+* `ktlint` - for formatting Kotlin code
+* `lua` - for compiling Lua to bytecode
+* `lua-format` - for formatting Lua code
+* `mlton` - for compiling Standard ML
+* `mono` - for compiling C# code
+* `ocaml` - for compiling and formatting OCaml code
+* `odin` - for compiling Odin
+* `pandoc` - for exporting Markdown to PDF
+* `prettier` - for formatting JavaScript, TypeScript and CSS
+* `python` - for compiling Python to bytecode
+* `rustc` - for compiling Rust
+* `rustfmt` - for formatting Rust
+* `scala` - for compiling Scala
+* `sdoc` - for writing man pages
+* `tidy` - for formatting XML
+* `v` - for compiling and formatting V code
+* `zig` - for compiling and formatting Zig code
 
 ## Size
 
-* The `o` executable is only **508k** when built with GCC 9.3 (for 64-bit Linux) and compressed with `upx`.
+* The `o` executable is **1.5M** when built with GCC 12 (for 64-bit Linux) and compressed with `upx`.
 * This isn't as small as [e3](https://sites.google.com/site/e3editor/), an editor written in assembly (which is **234k**), but it's reasonably lean.
 
-One way of building with `gccgo` and `upx`:
+One way of building with `gccgo` and `upx` (in the `v2` directory):
 
-    go build -mod=vendor -gccgoflags '-Os -s' && upx o
+    go build -mod=vendor -gccgoflags '-Os -s' -o o && upx --best --lzma o
 
-It's **5.2M** when built with Go 1.14 and no particular build flags are given.
+If the `o` executable is built with `go` instead, the size can be **8.7M**, or just **2.8M** when packed with `upx`:
+
+    go build -mod=vendor -ldflags='-s -w' -trimpath -o o && upx --best --lzma o
 
 ## Jumping to a specific line when opening a file
 
@@ -347,6 +555,16 @@ These four ways of opening `file.txt` at line `7` are supported:
 
 This also means that filenames containing `+` or `:`, and then followed by a number, are not supported.
 
+## Flags
+
+* `-f` can be used to open a file, regardless of if there are any locks. It can also be used for overwriting files together with `-p`.
+* `-c FILENAME` can be used to copy the contents of the given file to the clipboard and then exit.
+* `-p FILENAME` can be used to paste the contents of the clipboard to the given `FILENAME` (if it does not already exist) and then exit.
+* `-n` can be used to avoid writing lockfiles, build files, location history, search history and the game highscore to `$XDG_CACHE_DIR/cache/o` or `~/.cache/o`. Not recommended.
+* `-m` can be used to open a file as read-only, but monitor it for changes.
+* `--help` can be used to get a quick overview of the supported keybindings.
+* `--version` will print the current version and then exit.
+
 ## Spinner
 
 When loading files that are large or from a slow disk, an animated spinner will appear. The loading operation can be interrupted by pressing `esc`, `q` or `ctrl-q`.
@@ -358,8 +576,10 @@ When loading files that are large or from a slow disk, an animated spinner will 
 This shell function works in `zsh` and `bash` and may be useful for both searching for and opening a file at the given line number (works best if there is only one matching file, if not it will open several files in succession):
 
 ```bash
-fo() { find . -type f -wholename "*$1" -exec /usr/bin/o {} $2 \;; }
+fo() { find . -type f -wholename "*$1" -exec o {} $2 \;; }
 ```
+
+If too many files are found, it is possible to stop opening them by selecting `Stop parent and quit without saving` from the `ctrl-o` menu, which will quit the editor and also kill the parent `find` process.
 
 Example use:
 
@@ -367,27 +587,98 @@ Example use:
 fo somefile.cpp 123
 ```
 
+## Pandoc
+
+When using `pandoc` to export from Markdown to PDF:
+
+* If the `PAPERSIZE` environment variable is set to ie. `a4` or `letter`, it will be respected when exporting from Markdown to PDF using pandoc, at the press of `ctrl-space`.
+* The `--pdf-engine=xelatex` and `--listings` flags are used, so `xelatex` and the `listings` package needs to be available. A standard installation of LaTeX and Pandoc should provide both.
+* `Render to PDF with pandoc` will only appear on the `ctrl-o` menu when editing a Markdown file and `pandoc` is installed.
+
 ## Easter eggs
 
-Press `ctrl-space` **twice** to render Markdown files to PDF using `pandoc` (`ctrl-t` will save the text directly to PDF, without using `pandoc`).
+* Press the Konami code keys while in the `ctrl-o` menu to start a silly little game about feeding creatures with pellets before they are eaten. Alternatively, create a symlink for starting it directly, ie.: `ln -sf /usr/bin/o /usr/bin/feedgame`.
+* Press `right, down, left` or `left, down, right` in _rapid_ succession followed by either `down` to save or `up` to save _and_ quit.  The only purpose of this unusual shortcut is to help avoid the painful [Emacs pinky](http://xahlee.info/emacs/emacs/emacs_pinky.html).
 
-If the `PAPERSIZE` environment variable is set to ie. `a4` or `letter`, it will be respected when exporting from Markdown to PDF using pandoc, at the press of `ctrl-space`.
+## Included executables
 
-The `--pdf-engine=xelatex` and `--listings` flags are used, so `xelatex` and the `listings` package needs to be available. A standard installation of LaTeX and Pandoc should provide both.
+  * `o` - for terminal emulators that supports at least VT100
+  * `og` - for the VTE GUI (optional)
 
-## Suggested settings
+## Recommended symlinks
 
-These should work well together with `o`:
+```sh
+# For starting o with the Light theme
+ln -sf /usr/bin/o /usr/bin/li
+# For starting o with the Red/Black theme
+ln -sf /usr/bin/o /usr/bin/redblack
+# For starting o with the Synthwave theme
+ln -sf /usr/bin/o /usr/bin/sw
+# For starting o with the Blue Edit theme
+ln -sf /usr/bin/o /usr/bin/edi
+# For starting o with the Light VS theme
+ln -sf /usr/bin/o /usr/bin/vs
+```
 
-* Try the `JetBrains Mono NL` font.
+```sh
+# For starting the GUI version of o with the Light theme
+ln -sf /usr/bin/og /usr/bin/lig
+# For starting the GUI version of o with the Red/Black theme
+ln -sf /usr/bin/og /usr/bin/redblackg
+# For starting the GUI version of o with the Synthwave theme
+ln -sf /usr/bin/og /usr/bin/swg
+# For starting the GUI version of o with the Blue Edit theme
+ln -sf /usr/bin/og /usr/bin/edg
+# For starting the GUI version of o with the Light VS theme
+ln -sf /usr/bin/og /usr/bin/vg
+```
+
+## The GUI/VTE frontend `og`
+
+Build:
+
+    make gui
+
+Install (use `sudo` or `doas`, if needed):
+
+    make gui-install
+
+## Spellchecker
+
+* Press `ctrl-f` to search, and then type in `t` and press return to search for the next **t**ypo.
+* If a typo is found, press `ctrl-a` to (temporarily) add it to the dictionary or `ctrl-i` to (temporarily) ignore it.
+* The spellchecker uses a fixed English word list and does not store lists of custom words anywhere, yet.
+* When in Nano mode (when `o` is launched by a symlink or executable named `nan` or `nano`), `ctrl-t` searches for the next typo.
+* The spellchecker is an experimental feature.
+
+The built-in spellchecker uses a list of words from [this project](https://github.com/sindresorhus/word-list) that is licensed under this MIT license:
+
+```
+MIT License, Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+```
+
+## Terminal settings
 
 ### Konsole
 
-* Try the `Breeze` color scheme (but with a black background). It should work well together with `o`.
 * Untick the `Flow control` option in the profile settings, to ensure that `ctrl-s` will never freeze the terminal.
+
+## About the name
+
+* An [orbiton](https://en.wikipedia.org/wiki/Orbiton) is a [quasiparticle](https://en.wikipedia.org/wiki/Quasiparticle).
+
+## License scan
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fxyproto%2Forbiton.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fxyproto%2Forbiton?ref=badge_large)
+
+## Stars
+
+[![Stargazers over time](https://starchart.cc/xyproto/orbiton.svg)](https://starchart.cc/xyproto/orbiton)
 
 ## General info
 
-* Version: 2.36.0
+* Version: 2.65.12
 * License: 3-clause BSD
 * Author: Alexander F. Rødseth &lt;xyproto@archlinux.org&gt;
